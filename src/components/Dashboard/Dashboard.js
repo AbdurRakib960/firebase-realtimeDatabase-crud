@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Card, Container, Table } from 'react-bootstrap';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import firebase from '../../firebase';
 
 const Dashboard = () => {
@@ -29,7 +29,11 @@ const Dashboard = () => {
             setUsers(userInfo);
         });
     }, []);
-    console.log(users);
+
+    const handleDelete = (id) => {
+        const fireStore = firebase.database().ref('/UserInfo').child(id);
+        fireStore.remove();
+    };
     return (
         <>
             {users.length === 0 ? (
@@ -57,20 +61,35 @@ const Dashboard = () => {
                             <th>Update/delete</th>
                         </tr>
                     </thead>
-                    {users.map((user) => (
+                    {users.map((UserData) => (
                         <tbody>
                             <tr>
-                                <td>{user.FirstName}</td>
-                                <td>{user.LastName}</td>
+                                <td>{UserData.FirstName}</td>
+                                <td>{UserData.LastName}</td>
                                 <td className="d-flex justify-content-between">
-                                    <Button variant="primary"> update </Button>
-                                    <Button variant="danger">delete</Button>
+                                    <Link
+                                        className="btn btn-primary"
+                                        to={{ pathname: '/update', state: { data: UserData } }}
+                                    >
+                                        Update
+                                    </Link>
+                                    <Button
+                                        variant="danger"
+                                        onClick={() => {
+                                            handleDelete(UserData.id);
+                                        }}
+                                    >
+                                        delete
+                                    </Button>
                                 </td>
                             </tr>
                         </tbody>
                     ))}
                 </Table>
             )}
+            <Button onClick={() => history.push('/addUser')} className="btn btn-success">
+                Add User
+            </Button>
         </>
     );
 };
